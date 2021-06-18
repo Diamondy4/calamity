@@ -5,6 +5,7 @@
 module Calamity.Gateway.Shard (
   Shard (..),
   newShard,
+  sendToWs
 ) where
 
 import Calamity.Gateway.DispatchEvents
