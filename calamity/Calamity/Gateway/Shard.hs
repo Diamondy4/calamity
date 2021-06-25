@@ -56,6 +56,7 @@ import qualified System.X509 as X509
 import TextShow (showtl)
 import Prelude hiding (error)
 import PyF
+import Debug.Trace (trace, traceM)
 
 runWebsocket ::
   P.Members '[LogEff, P.Final IO, P.Embed IO] r =>
@@ -179,7 +180,7 @@ shardLoop = do
    where
     inner = do
       msg <- P.embed $ Ex.catchAny (Right <$> receiveData ws) handleWSException
-
+      --traceM $ [fmt|Handling event: {msg:s}|]
       case msg of
         Left (c, reason) -> do
           whenJust reason (\r -> error [fmt|Shard closed with reason: {r}|])
@@ -282,7 +283,7 @@ shardLoop = do
   handleMsg :: (ShardC r, P.Member (P.Error ShardFlowControl) r) => ShardMsg -> Sem r ()
   handleMsg (Discord msg) = case msg of
     EvtDispatch sn data' -> do
-      -- trace $ "Handling event: ("+||data'||+")"
+      --traceM $ [fmt|Handling event: {data':s}|]
       P.atomicModify' (#seqNum ?~ sn)
 
       case data' of
@@ -317,6 +318,9 @@ shardLoop = do
     SendPresence data' -> do
       debug [fmt|Sending presence: ({data':s})|]
       sendToWs $ StatusUpdate data'
+    VoiceStateGateway data' -> do
+      debug [fmt|Sending voice state update: ({data':s})|]
+      sendToWs $ VoiceStatusUpdate data'
     RestartShard -> P.throw ShardFlowRestart
     ShutDownShard -> P.throw ShardFlowShutDown
 

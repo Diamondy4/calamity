@@ -222,9 +222,14 @@ data TypingStartData = TypingStartData
     deriving (Show, Generic)
     deriving (FromJSON) via CalamityJSON TypingStartData
 
-newtype VoiceServerUpdateData = VoiceServerUpdateData Value
-    deriving newtype (Show, Generic)
-    deriving newtype (ToJSON, FromJSON)
+
+data VoiceServerUpdateData = VoiceServerUpdateData
+  { token :: Text,
+    guildID :: Snowflake Guild,
+    endpoint :: Text
+  }
+  deriving (Show, Generic)
+  deriving (ToJSON, FromJSON) via CalamityJSON VoiceServerUpdateData
 
 newtype WebhooksUpdateData = WebhooksUpdateData Value
     deriving newtype (Show, Generic)

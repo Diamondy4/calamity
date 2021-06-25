@@ -17,7 +17,7 @@ module Calamity.Client.Types (
 ) where
 
 import Calamity.Cache.Eff
-import Calamity.Gateway.DispatchEvents (CalamityEvent (..), InviteCreateData, InviteDeleteData, ReactionEvtData, ReadyData)
+import Calamity.Gateway.DispatchEvents (CalamityEvent (..), InviteCreateData, InviteDeleteData, ReactionEvtData, ReadyData, VoiceServerUpdateData)
 import Calamity.Gateway.Types (ControlMessage)
 import Calamity.HTTP.Internal.Types
 import Calamity.Metrics.Eff
@@ -163,6 +163,8 @@ data EventType
   | UserUpdateEvt
   | -- | Sent when someone joins/leaves/moves voice channels
     VoiceStateUpdateEvt
+  | -- | Fired after the bot sent Voice State Update request along with Voice State Update
+    VoiceServerUpdateEvt
   | -- | Fired when the bot receives an interaction
     InteractionEvt
   | -- | A custom event, @a@ is the data sent to the handler and should probably
@@ -226,6 +228,7 @@ type family EHType (d :: EventType) where
   EHType 'TypingStartEvt = (Channel, Snowflake User, UTCTime)
   EHType 'UserUpdateEvt = (User, User)
   EHType 'VoiceStateUpdateEvt = (Maybe VoiceState, VoiceState)
+  EHType 'VoiceServerUpdateEvt = (VoiceServerUpdateData)
   EHType 'InteractionEvt = Interaction
   EHType ( 'CustomEvt a) = a
 

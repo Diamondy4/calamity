@@ -13,6 +13,7 @@ module Calamity.Gateway.Types
     , ControlMessage(..)
     , ShardFlowControl(..)
     , Shard(..)
+    , VoiceStateUpdateData(..)
     , ShardState(..) ) where
 
 import           Calamity.Gateway.DispatchEvents
@@ -48,6 +49,8 @@ import Control.Lens.Operators ((^?))
 import Data.Aeson.Types (parseMaybe)
 import Control.Lens (Ixed(ix))
 import Data.Aeson.Lens
+import PyF
+import Debug.Trace (trace, traceM)
 
 type ShardC r = (P.Members '[LogEff, P.AtomicState ShardState, P.Embed IO, P.Final IO,
   P.Async, MetricEff] r)
@@ -74,6 +77,7 @@ instance FromJSON ReceivedDiscordMessage where
         d <- v .: "d"
         t <- v .: "t"
         s <- v .: "s"
+        --traceM [fmt|Got event! the data: {v:s}|]
         EvtDispatch s <$> parseDispatchData t d
 
       1  -> pure HeartBeatReq
@@ -206,10 +210,10 @@ data DispatchType
   deriving anyclass ( ToJSON, FromJSON )
 
 data VoiceStateUpdateData = VoiceStateUpdateData
-  { guild_id :: Snowflake Guild,
-    channel :: Maybe (Snowflake Channel),
-    self_mute :: Bool,
-    self_deaf :: Bool
+  { guildID:: Snowflake Guild,
+    channelID :: Maybe (Snowflake Channel),
+    selfMute :: Bool,
+    selfDeaf :: Bool
   }
   deriving ( Show, Generic )
   deriving ToJSON via CalamityJSON VoiceStateUpdateData
@@ -267,6 +271,7 @@ data ControlMessage
   = RestartShard
   | ShutDownShard
   | SendPresence StatusUpdateData
+  | VoiceStateGateway VoiceStateUpdateData
   deriving ( Show, Generic )
 
 data ShardFlowControl

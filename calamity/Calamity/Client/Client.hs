@@ -606,6 +606,8 @@ handleEvent' eh evt@(VoiceStateUpdate newVoiceState@V.VoiceState{guildID = Just 
     oldVoiceState <- ((find ((== V.sessionID newVoiceState) . V.sessionID) . voiceStates) =<<) <$> getGuild guildID
     updateCache evt
     pure $ map ($ (oldVoiceState, newVoiceState)) (getEventHandlers @ 'VoiceStateUpdateEvt eh)
+handleEvent' eh evt@(VoiceServerUpdate voiceServerData) = do
+    pure $ map ($ voiceServerData) (getEventHandlers @ 'VoiceServerUpdateEvt eh)
 handleEvent' eh evt@(InteractionCreate interaction) = do
     updateCache evt
     pure $ map ($ interaction) (getEventHandlers @ 'InteractionEvt eh)
